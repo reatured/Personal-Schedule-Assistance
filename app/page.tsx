@@ -113,9 +113,7 @@ function ScheduleApp() {
       const result = await upsertUserData(bundle)
       if (!result.success) {
         console.error("自动保存数据失败 (Failed to auto-save data):", result.error)
-        setSyncError(
-          `自动保存失败 (Auto-save failed): ${result.error}. 您的更改可能未保存到云端 (Your changes might not be saved to the cloud).`,
-        )
+        setSyncError(`Auto-save failed: ${result.error}. Your changes might not be saved to the cloud.`)
       } else {
         console.log("数据已成功自动保存。(Data auto-saved successfully.)")
       }
@@ -142,7 +140,7 @@ function ScheduleApp() {
         const migrationResult = await migrateLocalStorageToDatabase(getInitialUserBundle)
         if (!migrationResult.success && migrationResult.error) {
           console.error("迁移失败 (Migration failed):", migrationResult.error)
-          setSyncError(`数据迁移失败 (Data migration failed): ${migrationResult.error}`)
+          setSyncError(`Data migration failed: ${migrationResult.error}`)
         }
         if (migrationResult.migratedBundle) {
           loadedBundle = migrationResult.migratedBundle
@@ -161,7 +159,7 @@ function ScheduleApp() {
             }
           } else {
             console.error("从数据库加载用户数据时出错 (Error loading user data from DB):", dbResult.error)
-            setSyncError(`从云端加载数据失败 (Failed to load data from cloud): ${dbResult.error}`)
+            setSyncError(`Failed to load data from cloud: ${dbResult.error}`)
           }
         }
       } else if (typeof window !== "undefined") {
@@ -551,7 +549,7 @@ function ScheduleApp() {
       <div className="min-h-screen bg-gray-200 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-gray-900 mx-auto mb-4" />
-          <p className="text-gray-600">加载中... (Loading...)</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
@@ -568,30 +566,30 @@ function ScheduleApp() {
     >
       <div className="min-h-screen bg-gray-200 p-2 print:p-0 print:bg-white">
         <header className="mb-4 flex justify-between items-center print:hidden">
-          <h1 className="text-xl font-bold text-gray-800">个人日程构建器 (Auto-Sync)</h1>
+          <h1 className="text-xl font-bold text-gray-800">Personal Schedule Builder (Auto-Sync)</h1>
           <div className="flex items-center gap-2">
             {isSaving && ( // 显示保存中状态
               <div className="text-sm text-gray-500 flex items-center gap-1">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>保存中... (Saving...)</span>
+                <span>Saving...</span>
               </div>
             )}
             {syncError && (
               <div title={syncError} className="text-red-500 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                <span className="text-xs hidden sm:inline">保存错误 (Save Error)</span>
+                <span className="text-xs hidden sm:inline">Save Error</span>
               </div>
             )}
             {user ? (
               <>
                 <Button onClick={handleSignOut} variant="outline" size="sm">
-                  <LogOut className="mr-1.5 h-4 w-4" /> 登出 (Sign Out)
+                  <LogOut className="mr-1.5 h-4 w-4" /> Sign Out
                 </Button>
                 <span className="text-sm text-gray-600 hidden md:inline">{user.email}</span>
               </>
             ) : (
               <Button onClick={() => setShowAuthModal(true)} variant="outline" size="sm">
-                <User className="mr-1.5 h-4 w-4" /> 登录/注册 (Login/Register)
+                <User className="mr-1.5 h-4 w-4" /> Login/Register
               </Button>
             )}
             <Button onClick={handlePrint} variant="outline" size="sm">
@@ -626,10 +624,9 @@ function ScheduleApp() {
             appVersion={currentUserData.appVersion || APP_DATA_VERSION}
           />
           <div className="text-xs text-gray-500 mt-2 text-center">
-            创建于 (Created): {currentUserData.createdAt ? new Date(currentUserData.createdAt).toLocaleString() : "N/A"}{" "}
-            | 最后更新 (Last Updated):{" "}
-            {currentUserData.updatedAt ? new Date(currentUserData.updatedAt).toLocaleString() : "N/A"} | 数据版本 (Data
-            Version): {currentUserData.appVersion || "Unknown"}
+            Created: {currentUserData.createdAt ? new Date(currentUserData.createdAt).toLocaleString() : "N/A"} | Last
+            Updated: {currentUserData.updatedAt ? new Date(currentUserData.updatedAt).toLocaleString() : "N/A"} | Data
+            Version: {currentUserData.appVersion || "Unknown"}
           </div>
         </div>
       </div>

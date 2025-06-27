@@ -30,16 +30,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle>配置需要 (Configuration Required)</CardTitle>
+            <CardTitle>Configuration Required</CardTitle>
             <CardDescription>
-              Supabase 未配置。请设置环境变量以启用认证功能。
-              <br />
-              (Supabase is not configured. Please set up environment variables to enable authentication.)
+              Supabase is not configured. Please set up environment variables to enable authentication.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={onClose} className="w-full">
-              关闭 (Close)
+              Close
             </Button>
           </CardContent>
         </Card>
@@ -66,7 +64,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         if (error) {
           setError(error.message)
         } else {
-          setMessage("请检查您的邮箱以确认注册 (Please check your email to confirm registration)")
+          setMessage("Please check your email to confirm registration")
         }
       }
     } catch (err: any) {
@@ -96,12 +94,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-2">
             <User className="h-5 w-5" />
-            {isLogin ? "登录 (Login)" : "注册 (Sign Up)"}
+            {isLogin ? "Login" : "Sign Up"}
           </CardTitle>
           <CardDescription>
-            {isLogin
-              ? "登录以保存和同步您的日程安排 (Login to save and sync your schedules)"
-              : "创建账户以开始使用云端同步 (Create an account to start using cloud sync)"}
+            {isLogin ? "Login to save and sync your schedules" : "Create an account to start using cloud sync"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -111,7 +107,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   type="email"
-                  placeholder="邮箱地址 (Email address)"
+                  placeholder="Email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -122,7 +118,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   type="password"
-                  placeholder="密码 (Password)"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
@@ -139,10 +135,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <div className="flex gap-2">
               <Button type="submit" disabled={loading} className="flex-1">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLogin ? "登录 (Login)" : "注册 (Sign Up)"}
+                {isLogin ? "Login" : "Sign Up"}
               </Button>
               <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-                取消 (Cancel)
+                Cancel
               </Button>
             </div>
 
@@ -153,7 +149,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 className="text-sm text-blue-600 hover:underline"
                 disabled={loading}
               >
-                {isLogin ? "没有账户？点击注册 (No account? Sign up)" : "已有账户？点击登录 (Have an account? Login)"}
+                {isLogin ? "No account? Sign up" : "Have an account? Login"}
               </button>
             </div>
           </form>

@@ -39,12 +39,12 @@ export function TimeSlotRow({ slot, tasks, onDeleteTask }: TimeSlotRowProps) {
         ))}
         {tasks.length === 0 && isOver && (
           <div className="text-xs text-gray-400 p-2 border-2 border-dashed border-gray-300 rounded-md text-center print:p-0.5 print:text-[6.5pt] print:leading-tight print:border-dashed print:border print:border-gray-400">
-            将项目拖到此处 (Drop project here)
+            Drop project here
           </div>
         )}
         {tasks.length === 0 && !isOver && (
           <div className="text-xs text-gray-400 p-2 h-full flex items-center justify-center print:p-0.5 print:h-auto print:text-[6.5pt] print:leading-tight">
-            空闲 (Free)
+            Free
           </div>
         )}
       </div>

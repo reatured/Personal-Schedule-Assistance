@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // 获取初始会话 (Get initial session)
+    // Get initial session
     const getInitialSession = async () => {
       try {
         const {
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession()
 
-    // 监听认证状态变化 (Listen for auth state changes)
+    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {

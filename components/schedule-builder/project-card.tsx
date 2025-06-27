@@ -133,7 +133,7 @@ export function ProjectCard({
           variant="outline"
           size="sm"
           onClick={handleAddSubTaskClick}
-          className="mt-2 w-full text-xs h-auto py-1 print:hidden"
+          className="mt-2 w-full text-xs h-auto py-1 print:hidden bg-transparent"
         >
           <PlusCircle size={14} className="mr-1" /> Add Sub-task
         </Button>

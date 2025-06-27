@@ -35,7 +35,7 @@ export function ProjectColumn({
   return (
     <div className="w-full md:w-[320px] p-3 bg-gray-100 rounded-lg shadow print:w-[35%] print:p-1 print:shadow-none print:border print:border-gray-300 lg:w-[360]">
       <div className="flex justify-between items-center mb-3 print:mb-1">
-        <h2 className="text-lg font-semibold text-gray-700 print:text-base">项目列表</h2>
+        <h2 className="text-lg font-semibold text-gray-700 print:text-base">Project List</h2>
         <Button onClick={onAddNewProject} size="sm" className="print:hidden">
           <PlusCircle size={16} className="mr-1" /> New Project
         </Button>
@@ -54,7 +54,7 @@ export function ProjectColumn({
           />
         ))}
       </SortableContext>
-      {projects.length === 0 && <p className="text-sm text-gray-500">没有可用的项目。</p>}
+      {projects.length === 0 && <p className="text-sm text-gray-500">No projects available.</p>}
     </div>
   )
 }

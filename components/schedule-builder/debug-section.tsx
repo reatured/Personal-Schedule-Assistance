@@ -163,7 +163,11 @@ export function DebugSection({
         <Button onClick={handleApplyJson} className="bg-sky-600 hover:bg-sky-700 text-white">
           Apply JSON to App
         </Button>
-        <Button onClick={handleCopyJson} variant="outline" className="text-gray-300 border-gray-600 hover:bg-gray-700">
+        <Button
+          onClick={handleCopyJson}
+          variant="outline"
+          className="text-gray-300 border-gray-600 hover:bg-gray-700 bg-transparent"
+        >
           {copied ? (
             <Check size={16} className="mr-1.5 text-green-400" />
           ) : (
@@ -174,7 +178,7 @@ export function DebugSection({
         <Button
           onClick={handleExportJson}
           variant="outline"
-          className="text-gray-300 border-gray-600 hover:bg-gray-700"
+          className="text-gray-300 border-gray-600 hover:bg-gray-700 bg-transparent"
         >
           <Download size={16} className="mr-1.5" />
           Export JSON
@@ -182,7 +186,7 @@ export function DebugSection({
         <Button
           onClick={handleImportButtonClick}
           variant="outline"
-          className="text-gray-300 border-gray-600 hover:bg-gray-700"
+          className="text-gray-300 border-gray-600 hover:bg-gray-700 bg-transparent"
         >
           <Upload size={16} className="mr-1.5" />
           Import JSON

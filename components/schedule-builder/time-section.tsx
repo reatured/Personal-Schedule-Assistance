@@ -1,5 +1,4 @@
 // components/schedule-builder/time-section.tsx
-// 这个组件显示日程表的一个部分（上午、下午、傍晚）。
 // This component displays a section of the schedule (Morning, Afternoon, Evening).
 "use client"
 

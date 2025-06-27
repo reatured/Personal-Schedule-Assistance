@@ -3,8 +3,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "个人日程构建器 (Personal Schedule Builder)",
-  description: "A personal schedule builder with cloud sync capabilities",
+  title: "Personal Schedule Builder",
+  description: "A personal schedule builder with drag-and-drop functionality and cloud sync",
   generator: "v0.dev",
 }
 
