@@ -1,5 +1,5 @@
 // app/page.tsx
-// Main page component with Supabase authentication and database integration
+// Main page component with FastAPI backend integration
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
@@ -26,9 +26,8 @@ import { Printer, User, LogOut, FolderOpen } from "lucide-react"
 import { DebugSection } from "@/components/schedule-builder/debug-section"
 import { AuthModal } from "@/components/auth/auth-modal"
 import { ScheduleManager } from "@/components/schedule-builder/schedule-manager"
-import { getDefaultSchedule, migrateLocalStorageToDatabase } from "@/lib/schedule-db"
+import { getDefaultSchedule, migrateLocalStorageToDatabase } from "@/lib/schedule-api"
 import { AuthProvider, useAuth } from "@/lib/auth-context"
-import { isSupabaseAvailable } from "@/lib/supabase"
 
 const APP_VERSION = "1.0.4"
 const MAX_TASKS_PER_SLOT = 3
@@ -70,7 +69,7 @@ const getInitialSchedule = (): ScheduleData => {
 
 // 主应用组件 (Main app component)
 function ScheduleApp() {
-  const { user, loading: authLoading, signOut, isSupabaseEnabled } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
 
   const [projects, setProjects] = useState<Project[]>(getInitialProjects)
   const [scheduleData, setScheduleData] = useState<ScheduleData>(getInitialSchedule)
@@ -89,9 +88,9 @@ function ScheduleApp() {
     const loadData = async () => {
       if (authLoading) return // 等待认证状态确定 (Wait for auth state to be determined)
 
-      if (user && isSupabaseAvailable()) {
-        // 用户已登录且 Supabase 可用，尝试迁移本地数据并加载默认日程
-        // (User logged in and Supabase available, try to migrate local data and load default schedule)
+      if (user) {
+        // 用户已登录，尝试迁移本地数据并加载默认日程
+        // (User logged in, try to migrate local data and load default schedule)
         try {
           // 首先尝试迁移本地数据 (First try to migrate local data)
           const migrationResult = await migrateLocalStorageToDatabase()
@@ -112,7 +111,7 @@ function ScheduleApp() {
           loadFromLocalStorage()
         }
       } else {
-        // 用户未登录或 Supabase 不可用，使用本地存储 (User not logged in or Supabase unavailable, use localStorage)
+        // 用户未登录，使用本地存储 (User not logged in, use localStorage)
         loadFromLocalStorage()
       }
 

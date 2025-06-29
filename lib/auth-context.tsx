@@ -4,14 +4,18 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import type { User, Session } from "@supabase/supabase-js"
-import { supabase, isSupabaseAvailable } from "./supabase"
+import { apiClient } from "./api-client"
+
+interface User {
+  id: number
+  email: string
+  created_at: string
+  updated_at?: string
+}
 
 interface AuthContextType {
   user: User | null
-  session: Session | null
   loading: boolean
-  isSupabaseEnabled: boolean
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signUp: (email: string, password: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
@@ -21,84 +25,65 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
-  const isSupabaseEnabled = isSupabaseAvailable()
 
   useEffect(() => {
-    if (!isSupabaseEnabled || !supabase) {
-      setLoading(false)
-      return
-    }
-
-    // 获取初始会话 (Get initial session)
-    const getInitialSession = async () => {
+    // Check if user is authenticated on app load
+    const checkAuth = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        setSession(session)
-        setUser(session?.user ?? null)
+        const result = await apiClient.getCurrentUser()
+        if (result.success && result.data) {
+          setUser(result.data)
+        }
       } catch (error) {
-        console.error("Error getting initial session:", error)
+        console.error("Error checking authentication:", error)
       } finally {
         setLoading(false)
       }
     }
 
-    getInitialSession()
-
-    // 监听认证状态变化 (Listen for auth state changes)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [isSupabaseEnabled])
+    checkAuth()
+  }, [])
 
   const signIn = async (email: string, password: string) => {
-    if (!isSupabaseEnabled || !supabase) {
-      return { error: { message: "Supabase is not configured" } }
-    }
-
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      return { error }
+      const result = await apiClient.login(email, password)
+      if (result.success && result.data) {
+        apiClient.setToken(result.data.access_token)
+        
+        // Get user info
+        const userResult = await apiClient.getCurrentUser()
+        if (userResult.success && userResult.data) {
+          setUser(userResult.data)
+        }
+        
+        return { error: null }
+      } else {
+        return { error: { message: result.error || "Login failed" } }
+      }
     } catch (error: any) {
       return { error: { message: error.message || "Sign in failed" } }
     }
   }
 
   const signUp = async (email: string, password: string) => {
-    if (!isSupabaseEnabled || !supabase) {
-      return { error: { message: "Supabase is not configured" } }
-    }
-
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-      return { error }
+      const result = await apiClient.register(email, password)
+      if (result.success) {
+        // After successful registration, automatically log in
+        return await signIn(email, password)
+      } else {
+        return { error: { message: result.error || "Registration failed" } }
+      }
     } catch (error: any) {
       return { error: { message: error.message || "Sign up failed" } }
     }
   }
 
   const signOut = async () => {
-    if (!isSupabaseEnabled || !supabase) {
-      return
-    }
-
     try {
-      await supabase.auth.signOut()
+      apiClient.setToken(null)
+      setUser(null)
     } catch (error) {
       console.error("Error signing out:", error)
     }
@@ -106,9 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     user,
-    session,
     loading,
-    isSupabaseEnabled,
     signIn,
     signUp,
     signOut,
