@@ -1,5 +1,5 @@
 // app/page.tsx
-// Main page component with Supabase authentication and database integration
+// Main page component with local storage persistence and data migration.
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
@@ -22,15 +22,10 @@ import { ScheduleColumn } from "@/components/schedule-builder/schedule-column"
 import { ProjectCard } from "@/components/schedule-builder/project-card"
 import { ScheduledItemCard } from "@/components/schedule-builder/scheduled-item-card"
 import { Button } from "@/components/ui/button"
-import { Printer, User, LogOut, FolderOpen } from "lucide-react"
+import { Printer } from "lucide-react"
 import { DebugSection } from "@/components/schedule-builder/debug-section"
-import { AuthModal } from "@/components/auth/auth-modal"
-import { ScheduleManager } from "@/components/schedule-builder/schedule-manager"
-import { getDefaultSchedule, migrateLocalStorageToDatabase } from "@/lib/schedule-db"
-import { AuthProvider, useAuth } from "@/lib/auth-context"
-import { isSupabaseAvailable } from "@/lib/supabase"
 
-const APP_VERSION = "1.0.4"
+const APP_VERSION = "1.0.3" // Incremented version for data migration feature
 const MAX_TASKS_PER_SLOT = 3
 const LOCAL_STORAGE_KEY = "personal-schedule-builder-data"
 const generateId = () => crypto.randomUUID()
@@ -58,6 +53,109 @@ interface LocalStorageData {
   nextColorIndex: number
 }
 
+// 数据迁移函数 (Data migration function)
+const migrateData = (data: any): LocalStorageData => {
+  // 如果没有版本信息，假设是最早版本 (If no version info, assume earliest version)
+  const version = data.version || "1.0.0"
+
+  const migratedData = { ...data }
+
+  console.log(`Migrating data from version ${version} to ${APP_VERSION}`)
+
+  // 版本 1.0.0 到 1.0.1 的迁移 (Migration from 1.0.0 to 1.0.1)
+  if (version === "1.0.0") {
+    // 在早期版本中，可能没有 nextColorIndex (Early versions might not have nextColorIndex)
+    if (typeof migratedData.nextColorIndex !== "number") {
+      migratedData.nextColorIndex = (migratedData.projects?.length || 0) % projectColors.length
+    }
+
+    // 确保所有项目都有颜色 (Ensure all projects have colors)
+    if (Array.isArray(migratedData.projects)) {
+      migratedData.projects = migratedData.projects.map((project: any, index: number) => ({
+        ...project,
+        color: project.color || projectColors[index % projectColors.length],
+      }))
+    }
+  }
+
+  // 版本 1.0.1 到 1.0.2 的迁移 (Migration from 1.0.1 to 1.0.2)
+  if (version === "1.0.1") {
+    // 在这个版本中添加了本地存储功能，但数据结构没有变化
+    // (Local storage was added in this version, but data structure didn't change)
+    console.log("No migration needed from 1.0.1 to 1.0.2")
+  }
+
+  // 版本 1.0.2 到 1.0.3 的迁移 (Migration from 1.0.2 to 1.0.3)
+  if (version === "1.0.2") {
+    // 在这个版本中添加了数据迁移功能，但数据结构没有变化
+    // (Data migration was added in this version, but data structure didn't change)
+    console.log("No migration needed from 1.0.2 to 1.0.3")
+  }
+
+  // 通用数据验证和修复 (General data validation and repair)
+
+  // 确保 projects 是数组 (Ensure projects is an array)
+  if (!Array.isArray(migratedData.projects)) {
+    console.warn("Invalid projects data, resetting to defaults")
+    migratedData.projects = getInitialProjects()
+  }
+
+  // 确保每个项目都有必需的字段 (Ensure each project has required fields)
+  migratedData.projects = migratedData.projects.map((project: any, index: number) => ({
+    id: project.id || generateId(),
+    name: project.name || `Project ${index + 1}`,
+    subTasks: Array.isArray(project.subTasks)
+      ? project.subTasks.map((subTask: any) => ({
+          id: subTask.id || generateId(),
+          text: subTask.text || "Untitled Task",
+          completed: Boolean(subTask.completed),
+        }))
+      : [],
+    color: project.color || projectColors[index % projectColors.length],
+  }))
+
+  // 确保 schedule 是对象 (Ensure schedule is an object)
+  if (typeof migratedData.schedule !== "object" || migratedData.schedule === null) {
+    console.warn("Invalid schedule data, resetting to defaults")
+    migratedData.schedule = getInitialSchedule()
+  } else {
+    // 验证和修复 schedule 数据 (Validate and repair schedule data)
+    const validatedSchedule: ScheduleData = {}
+    allTimeSlots.forEach((slot) => {
+      const slotTasks = migratedData.schedule[slot.id]
+      if (Array.isArray(slotTasks)) {
+        validatedSchedule[slot.id] = slotTasks.map((task: any) => ({
+          id: task.id || generateId(),
+          projectId: task.projectId || generateId(),
+          projectName: task.projectName || "Unknown Project",
+          projectColor: task.projectColor || "bg-gray-500 text-white",
+          originalProjectSubTasks: Array.isArray(task.originalProjectSubTasks)
+            ? task.originalProjectSubTasks.map((subTask: any) => ({
+                id: subTask.id || generateId(),
+                text: subTask.text || "Untitled Task",
+                completed: Boolean(subTask.completed),
+              }))
+            : [],
+        }))
+      } else {
+        validatedSchedule[slot.id] = []
+      }
+    })
+    migratedData.schedule = validatedSchedule
+  }
+
+  // 确保 nextColorIndex 是数字 (Ensure nextColorIndex is a number)
+  if (typeof migratedData.nextColorIndex !== "number") {
+    migratedData.nextColorIndex = (migratedData.projects?.length || 0) % projectColors.length
+  }
+
+  // 更新版本号 (Update version number)
+  migratedData.version = APP_VERSION
+
+  console.log("Data migration completed successfully")
+  return migratedData as LocalStorageData
+}
+
 const getInitialProjects = () => JSON.parse(JSON.stringify(defaultInitialProjects)) as Project[]
 
 const getInitialSchedule = (): ScheduleData => {
@@ -68,93 +166,74 @@ const getInitialSchedule = (): ScheduleData => {
   return initialSchedule
 }
 
-// 主应用组件 (Main app component)
-function ScheduleApp() {
-  const { user, loading: authLoading, signOut, isSupabaseEnabled } = useAuth()
+// 从本地存储加载数据 (Load data from local storage)
+const loadFromLocalStorage = (): LocalStorageData | null => {
+  if (typeof window === "undefined") return null
 
-  const [projects, setProjects] = useState<Project[]>(getInitialProjects)
-  const [scheduleData, setScheduleData] = useState<ScheduleData>(getInitialSchedule)
-  const [nextColorIndex, setNextColorIndex] = useState<number>(getInitialProjects().length % projectColors.length)
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
+    if (!stored) return null
+
+    const parsed = JSON.parse(stored)
+
+    // 应用数据迁移 (Apply data migration)
+    const migrated = migrateData(parsed)
+
+    // 如果数据被迁移了，保存新版本 (If data was migrated, save the new version)
+    if (migrated.version !== parsed.version) {
+      console.log(`Data migrated from ${parsed.version || "unknown"} to ${migrated.version}`)
+      saveToLocalStorage(migrated)
+    }
+
+    return migrated
+  } catch (error) {
+    console.error("Error loading from localStorage:", error)
+    return null
+  }
+}
+
+// 保存数据到本地存储 (Save data to local storage)
+const saveToLocalStorage = (data: LocalStorageData) => {
+  if (typeof window === "undefined") return
+
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data))
+  } catch (error) {
+    console.error("Error saving to localStorage:", error)
+  }
+}
+
+export default function SchedulePage() {
+  // 初始化状态，优先使用本地存储的数据 (Initialize state, prioritizing local storage data)
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const stored = loadFromLocalStorage()
+    return stored?.projects || getInitialProjects()
+  })
+
+  const [scheduleData, setScheduleData] = useState<ScheduleData>(() => {
+    const stored = loadFromLocalStorage()
+    return stored?.schedule || getInitialSchedule()
+  })
+
+  const [nextColorIndex, setNextColorIndex] = useState<number>(() => {
+    const stored = loadFromLocalStorage()
+    return stored?.nextColorIndex ?? getInitialProjects().length % projectColors.length
+  })
 
   const [activeDraggedItem, setActiveDraggedItem] = useState<Project | ScheduledTask | null>(null)
   const [activeDraggedItemType, setActiveDraggedItemType] = useState<string | null>(null)
   const [activeParentSlotId, setActiveParentSlotId] = useState<string | null>(null)
 
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [showScheduleManager, setShowScheduleManager] = useState(false)
-  const [dataLoaded, setDataLoaded] = useState(false)
-
-  // 加载数据的逻辑 (Data loading logic)
+  // 自动保存到本地存储 (Auto-save to local storage)
   useEffect(() => {
-    const loadData = async () => {
-      if (authLoading) return // 等待认证状态确定 (Wait for auth state to be determined)
-
-      if (user && isSupabaseAvailable()) {
-        // 用户已登录且 Supabase 可用，尝试迁移本地数据并加载默认日程
-        // (User logged in and Supabase available, try to migrate local data and load default schedule)
-        try {
-          // 首先尝试迁移本地数据 (First try to migrate local data)
-          const migrationResult = await migrateLocalStorageToDatabase()
-          if (!migrationResult.success && migrationResult.error) {
-            console.error("Migration failed:", migrationResult.error)
-          }
-
-          // 然后加载默认日程 (Then load default schedule)
-          const result = await getDefaultSchedule()
-          if (result.success && result.schedule) {
-            setProjects(result.schedule.data.projects)
-            setScheduleData(result.schedule.data.schedule)
-            setNextColorIndex(result.schedule.data.nextColorIndex)
-          }
-        } catch (error) {
-          console.error("Error loading user data:", error)
-          // 如果云端加载失败，回退到本地存储 (If cloud loading fails, fallback to localStorage)
-          loadFromLocalStorage()
-        }
-      } else {
-        // 用户未登录或 Supabase 不可用，使用本地存储 (User not logged in or Supabase unavailable, use localStorage)
-        loadFromLocalStorage()
-      }
-
-      setDataLoaded(true)
-    }
-
-    // Add helper function for loading from localStorage
-    const loadFromLocalStorage = () => {
-      if (typeof window === "undefined") return
-
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored)
-          setProjects(parsed.projects || getInitialProjects())
-          setScheduleData(parsed.schedule || getInitialSchedule())
-          setNextColorIndex(parsed.nextColorIndex ?? getInitialProjects().length % projectColors.length)
-        } catch (error) {
-          console.error("Error loading from localStorage:", error)
-          // 如果本地存储也失败，使用默认数据 (If localStorage also fails, use default data)
-          setProjects(getInitialProjects())
-          setScheduleData(getInitialSchedule())
-          setNextColorIndex(getInitialProjects().length % projectColors.length)
-        }
-      }
-    }
-
-    loadData()
-  }, [user, authLoading])
-
-  // 自动保存到本地存储（仅在未登录时）(Auto-save to localStorage only when not logged in)
-  useEffect(() => {
-    if (!dataLoaded || user) return // 不在用户登录时保存到本地存储 (Don't save to localStorage when user is logged in)
-
     const dataToSave: LocalStorageData = {
       version: APP_VERSION,
       projects,
       schedule: scheduleData,
       nextColorIndex,
     }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave))
-  }, [projects, scheduleData, nextColorIndex, dataLoaded, user])
+    saveToLocalStorage(dataToSave)
+  }, [projects, scheduleData, nextColorIndex])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -330,9 +409,17 @@ function ScheduleApp() {
 
   const handleDebugStateApply = useCallback(
     (newData: { version: string; projects: Project[]; schedule: ScheduleData; nextColorIndex?: number }) => {
-      setProjects(newData.projects || [])
-      setScheduleData(newData.schedule || getInitialSchedule())
-      setNextColorIndex(newData.nextColorIndex !== undefined ? newData.nextColorIndex : 0)
+      // 应用数据迁移到导入的数据 (Apply data migration to imported data)
+      const migratedData = migrateData(newData)
+
+      if (migratedData.version !== newData.version) {
+        console.log(`Imported data migrated from ${newData.version || "unknown"} to ${migratedData.version}`)
+        // 可以在这里显示一个通知给用户 (Could show a notification to the user here)
+      }
+
+      setProjects(migratedData.projects || [])
+      setScheduleData(migratedData.schedule || getInitialSchedule())
+      setNextColorIndex(migratedData.nextColorIndex !== undefined ? migratedData.nextColorIndex : 0)
     },
     [],
   )
@@ -342,42 +429,14 @@ function ScheduleApp() {
     setScheduleData(getInitialSchedule())
     setNextColorIndex(getInitialProjects().length % projectColors.length)
     // 清除本地存储 (Clear local storage)
-    if (typeof window !== "undefined" && !user) {
+    if (typeof window !== "undefined") {
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY)
       } catch (error) {
         console.error("Error clearing localStorage:", error)
       }
     }
-  }, [user])
-
-  const handleLoadSchedule = useCallback(
-    (newProjects: Project[], newScheduleData: ScheduleData, newNextColorIndex: number) => {
-      setProjects(newProjects)
-      setScheduleData(newScheduleData)
-      setNextColorIndex(newNextColorIndex)
-    },
-    [],
-  )
-
-  const handleSignOut = async () => {
-    await signOut()
-    // 登出后重置为默认数据 (Reset to default data after sign out)
-    setProjects(getInitialProjects())
-    setScheduleData(getInitialSchedule())
-    setNextColorIndex(getInitialProjects().length % projectColors.length)
-  }
-
-  if (authLoading || !dataLoaded) {
-    return (
-      <div className="min-h-screen bg-gray-200 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载中... (Loading...)</p>
-        </div>
-      </div>
-    )
-  }
+  }, [])
 
   return (
     <DndContext
@@ -389,28 +448,10 @@ function ScheduleApp() {
       <div className="min-h-screen bg-gray-200 p-2 print:p-0 print:bg-white">
         <header className="mb-4 flex justify-between items-center print:hidden">
           <h1 className="text-xl font-bold text-gray-800">个人日程构建器</h1>
-          <div className="flex items-center gap-2">
-            {user ? (
-              <>
-                <Button onClick={() => setShowScheduleManager(true)} variant="outline" size="sm">
-                  <FolderOpen className="mr-1.5 h-4 w-4" /> 管理日程 (Manage)
-                </Button>
-                <Button onClick={handleSignOut} variant="outline" size="sm">
-                  <LogOut className="mr-1.5 h-4 w-4" /> 登出 (Sign Out)
-                </Button>
-                <span className="text-sm text-gray-600">{user.email}</span>
-              </>
-            ) : (
-              <Button onClick={() => setShowAuthModal(true)} variant="outline" size="sm">
-                <User className="mr-1.5 h-4 w-4" /> 登录 (Login)
-              </Button>
-            )}
-            <Button onClick={handlePrint} variant="outline" size="sm">
-              <Printer className="mr-1.5 h-4 w-4" /> Print
-            </Button>
-          </div>
+          <Button onClick={handlePrint} variant="outline" size="sm">
+            <Printer className="mr-1.5 h-4 w-4" /> Print
+          </Button>
         </header>
-
         {/* Wrapper for print layout control */}
         <div className="print:max-w-[20cm] print:mx-auto">
           <main className="flex flex-col md:flex-row gap-3 print:flex-row print:gap-2">
@@ -440,20 +481,6 @@ function ScheduleApp() {
         </div>
       </div>
 
-      {/* Modals */}
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-
-      {user && (
-        <ScheduleManager
-          currentProjects={projects}
-          currentScheduleData={scheduleData}
-          currentNextColorIndex={nextColorIndex}
-          onLoadSchedule={handleLoadSchedule}
-          isOpen={showScheduleManager}
-          onClose={() => setShowScheduleManager(false)}
-        />
-      )}
-
       <DragOverlay dropAnimation={null}>
         {activeDraggedItem && activeDraggedItemType === "project" && (
           <ProjectCard
@@ -472,14 +499,5 @@ function ScheduleApp() {
         )}
       </DragOverlay>
     </DndContext>
-  )
-}
-
-// 包装组件，提供认证上下文 (Wrapper component providing auth context)
-export default function SchedulePage() {
-  return (
-    <AuthProvider>
-      <ScheduleApp />
-    </AuthProvider>
   )
 }
