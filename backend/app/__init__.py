@@ -1,1 +1,0 @@
-# FastAPI Schedule Builder Backend 
