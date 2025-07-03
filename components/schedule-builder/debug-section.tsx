@@ -281,6 +281,7 @@ Use these exact color combinations:
 6. Make some sub-tasks completed (true) to show progress
 7. Use descriptive, actionable sub-task names
 8. Ensure all IDs are unique across the entire JSON
+9. Same project can be in multiple time slot
 
 Please generate a complete JSON following this structure for a realistic work schedule.`
 
@@ -459,6 +460,7 @@ Please generate a complete JSON following this structure for a realistic work sc
             <br />• All objects need unique "id" fields
             <br />• Projects need name, color, subTasks
             <br />• Schedule tasks copy project data
+            <br />• Same Project can take multiple hour sections
           </div>
         </div>
         <div className="mt-2">
@@ -467,8 +469,8 @@ Please generate a complete JSON following this structure for a realistic work sc
           (all with "text-white")
         </div>
         <div className="mt-2 pt-2 border-t border-gray-700">
-          <strong className="text-yellow-300">💡 Tip:</strong> Click "Copy ChatGPT Instructions" to get a complete
-          prompt you can paste directly into ChatGPT to generate realistic schedule data!
+          <strong className="text-yellow-300">💡 Tip:</strong> Click "Copy with Instructions" to get a complete
+          prompt you can paste directly into AI tools to generate realistic schedule data!
         </div>
       </div>
     </div>

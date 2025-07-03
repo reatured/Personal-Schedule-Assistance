@@ -86,205 +86,202 @@ body {
   }
 }
 
-/* --- Updated Styles for Printing --- */
+/* --- AGGRESSIVE Print Styles for Single Page --- */
 @media print {
+  @page {
+    size: A4;
+    margin: 0.3cm;
+  }
+
+  * {
+    box-sizing: border-box !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  html,
   body {
-    margin: 0;
-    padding: 0.5cm; /* Page margins */
-    font-size: 9pt;
+    height: auto !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body {
+    font-size: 6pt !important;
+    line-height: 1.1 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     background-color: #fff !important;
-    width: auto !important; /* Allow body to be natural width for print */
+    transform: scale(0.85) !important; /* Scale everything down by 15% */
+    transform-origin: top left !important;
+    width: 117.6% !important; /* Compensate for scale */
+    height: 117.6% !important;
   }
 
   .print\:hidden {
     display: none !important;
   }
 
-  .print\:bg-white {
-    /* Ensure the main app container has a white background for print */
-    background-color: #fff !important;
-  }
-
-  /* --- Layout --- */
-  /* The wrapper div in page.tsx with print:max-w-[20cm] print:mx-auto handles content width */
+  /* Main container - force single page */
   main.print\:flex-row {
-    /* padding: 0.25cm !important; /* Removed, page margin is on body */
-    width: 100% !important; /* Main content should fill its container */
-    box-sizing: border-box;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 26cm !important;
+    overflow: hidden !important;
+    display: flex !important;
+    gap: 0.2rem !important;
   }
 
+  /* Project column - make narrower */
   .print\:w-\[35\%\] {
-    /* This class is used by ProjectColumn */
-    width: 33% !important; /* Reduced width for project list */
-    flex-shrink: 0;
+    width: 30% !important;
+    flex-shrink: 0 !important;
+    padding: 0.1rem !important;
   }
+
+  /* Schedule column */
   .print\:flex-1 {
-    /* ScheduleColumn width */
     flex: 1 !important;
-    min-width: 0;
-  }
-  .print\:gap-2 {
-    gap: 0.25rem !important;
+    padding: 0.1rem !important;
+    min-width: 0 !important;
   }
 
-  /* --- Text Size Reductions --- */
-  .print\:text-base {
-    font-size: 10pt !important;
-  }
-  .text-lg {
-    font-size: 10pt !important;
-  }
-  .print\:text-sm {
-    font-size: 8pt !important;
-  }
-  .text-sm {
-    font-size: 8pt !important;
-  }
-  .text-xs {
-    font-size: 7pt !important;
-    line-height: 1.2 !important;
-  }
-
-  /* --- Padding & Margin Reductions for Print --- */
-  .p-0 {
-    padding: 0 !important;
-  }
-  .p-1 {
-    padding: 0.125rem !important;
-  }
-  .p-2 {
-    padding: 0.25rem !important;
-  }
-  .p-3 {
-    padding: 0.375rem !important;
-  }
-  .p-4 {
-    padding: 0.5rem !important;
-  }
-  .px-1 {
-    padding-left: 0.125rem !important;
-    padding-right: 0.125rem !important;
-  }
-  .py-1 {
-    padding-top: 0.125rem !important;
-    padding-bottom: 0.125rem !important;
-  }
-  .px-2 {
-    padding-left: 0.25rem !important;
-    padding-right: 0.25rem !important;
-  }
-  .py-2 {
-    padding-top: 0.25rem !important;
-    padding-bottom: 0.25rem !important;
-  }
-  .px-3 {
-    padding-left: 0.375rem !important;
-    padding-right: 0.375rem !important;
-  }
-  .py-3 {
-    padding-top: 0.375rem !important;
-    padding-bottom: 0.375rem !important;
-  }
-  .pt-0 {
-    padding-top: 0 !important;
-  }
-  .pt-1 {
-    padding-top: 0.125rem !important;
-  }
-  .pt-2 {
-    padding-top: 0.25rem !important;
-  }
-
-  .m-0 {
+  /* Headers */
+  h1,
+  h2,
+  h3 {
     margin: 0 !important;
+    padding: 0.1rem !important;
+    font-size: 7pt !important;
+    font-weight: bold !important;
   }
-  .mt-1 {
-    margin-top: 0.125rem !important;
-  }
-  .mb-1 {
-    margin-bottom: 0.125rem !important;
-  }
-  .mt-2 {
-    margin-top: 0.25rem !important;
-  }
-  .mb-2 {
-    margin-bottom: 0.25rem !important;
-  }
-  .mt-3 {
-    margin-top: 0.375rem !important;
-  }
-  .mb-3 {
-    margin-bottom: 0.375rem !important;
-  }
-  .mb-4 {
-    margin-bottom: 0.5rem !important;
-  }
+
+  /* Time sections - ultra compact */
   .mb-6 {
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 0.1rem !important;
   }
 
-  .space-y-1 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-y-reverse: 0;
-    margin-top: calc(0.125rem * calc(1 - var(--tw-space-y-reverse))) !important;
-    margin-bottom: calc(0.125rem * var(--tw-space-y-reverse)) !important;
-  }
-  .space-x-1 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-x-reverse: 0;
-    margin-right: calc(0.125rem * var(--tw-space-x-reverse)) !important;
-    margin-left: calc(0.125rem * calc(1 - var(--tw-space-x-reverse))) !important;
-  }
-  .project-card-subtask-list-print-padding {
-    padding-top: 0.125rem !important;
-  }
-  .p-1\.5 {
-    padding: 0.125rem !important;
-  }
-  .mb-1\.5 {
-    margin-bottom: 0.125rem !important;
+  /* Time section headers */
+  h3 {
+    padding: 0.1rem 0.2rem !important;
+    font-size: 6pt !important;
+    border-bottom: 0.5pt solid #ccc !important;
   }
 
-  /* --- Visuals: Keep shadows and rounded corners --- */
-  .shadow,
-  .shadow-md,
-  .shadow-lg,
-  .shadow-xl {
-    box-shadow: var(--tw-shadow, 0 0 #0000) !important;
+  /* Time slot rows - make tiny */
+  .min-h-\[60px\] {
+    min-height: 12px !important;
+    height: 12px !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
-  /* --- Borders --- */
-  .border,
-  .border-b,
+  /* Time slot content */
+  .border-b {
+    border-bottom: 0.25pt solid #ddd !important;
+  }
+
   .border-r {
-    border-width: 0.5pt !important;
-    border-color: #d1d5db !important;
+    border-right: 0.25pt solid #ddd !important;
   }
 
-  /* --- Checkbox Visuals for Print --- */
+  /* Time labels */
+  .w-1\/4 {
+    width: 25% !important;
+    padding: 0.05rem !important;
+    font-size: 5pt !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .w-3\/4 {
+    width: 75% !important;
+    padding: 0.05rem !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Project cards - ultra compact */
+  .mb-2 {
+    margin-bottom: 0.05rem !important;
+  }
+
+  .p-2,
+  .p-3,
+  .p-4 {
+    padding: 0.1rem !important;
+  }
+
+  .p-1 {
+    padding: 0.05rem !important;
+  }
+
+  /* Scheduled task cards - tiny */
+  .mb-1\.5 {
+    margin-bottom: 0.02rem !important;
+  }
+
+  .p-1\.5 {
+    padding: 0.05rem !important;
+  }
+
+  /* Text sizes - all very small */
+  .text-lg {
+    font-size: 6pt !important;
+  }
+
+  .text-sm,
+  .print\:text-sm {
+    font-size: 5pt !important;
+  }
+
+  .text-xs {
+    font-size: 4pt !important;
+    line-height: 1 !important;
+  }
+
+  .print\:text-base {
+    font-size: 6pt !important;
+  }
+
+  /* Sub-task lists */
+  .space-y-1 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.02rem !important;
+    margin-bottom: 0.02rem !important;
+  }
+
+  /* Checkboxes - tiny */
   input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 8px;
-    height: 8px;
-    border: 0.5pt solid #666;
-    border-radius: 1px;
-    vertical-align: middle;
-    margin-right: 3px;
-    position: relative;
-    top: -0.5px;
-  }
-  input[type="checkbox"]:checked::before {
-    content: "✔";
-    font-size: 6pt;
-    color: #333;
-    position: absolute;
-    top: -0.5px;
-    left: 0.5px;
-    line-height: 1;
+    width: 6px !important;
+    height: 6px !important;
+    margin-right: 2px !important;
+    border: 0.25pt solid #666 !important;
   }
 
-  /* Ensure background colors for projects and sections print */
+  input[type="checkbox"]:checked::before {
+    font-size: 4pt !important;
+    top: -1px !important;
+    left: 0px !important;
+  }
+
+  /* Remove all unnecessary spacing */
+  .mt-1,
+  .mt-2,
+  .mt-3 {
+    margin-top: 0.02rem !important;
+  }
+
+  .mb-1,
+  .mb-2,
+  .mb-3,
+  .mb-4 {
+    margin-bottom: 0.02rem !important;
+  }
+
+  /* Background colors - ensure they print */
   .bg-blue-500 {
     background-color: #3b82f6 !important;
     color: white !important;
@@ -344,5 +341,35 @@ body {
   }
   .text-white {
     color: #ffffff !important;
+  }
+
+  /* Remove shadows for print */
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl {
+    box-shadow: none !important;
+  }
+
+  /* Borders - very thin */
+  .border {
+    border-width: 0.25pt !important;
+    border-color: #ccc !important;
+  }
+
+  /* Force content to fit */
+  .rounded-lg,
+  .rounded-md {
+    border-radius: 1pt !important;
+  }
+
+  /* Ensure no page breaks */
+  .print\:w-\[35\%\],
+  .print\:flex-1,
+  main,
+  div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
