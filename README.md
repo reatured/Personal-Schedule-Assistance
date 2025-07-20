@@ -2,6 +2,10 @@
 
 A clean, fast, and fully responsive scheduling dashboard to help you stay productive—whether you're online or offline. Built with modern web tools like **React**, **@dnd-kit**, **Supabase**, and **Tailwind CSS**, this project demonstrates full-stack execution and product-oriented thinking under tight deadlines.
 
+## 🚀 Live Demo
+
+👉 [**Try the Demo**](https://v0-personal-work-dashboard-gules.vercel.app/)
+
 ---
 
 ## 🔑 Key Features
@@ -13,12 +17,6 @@ A clean, fast, and fully responsive scheduling dashboard to help you stay produc
 - 📱 **Responsive Design** – Optimized for desktop, tablet, and mobile use.
 - 🔐 **User Authentication** – Secure email-based login with verification.
 - 💾 **Data Backup & Restore** – Easily migrate or recover data using JSON import/export.
-
----
-
-## 📸 Preview
-
-![Preview Screenshot](./public/preview.png) <!-- Replace this with an actual screenshot path if available -->
 
 ---
 
@@ -40,36 +38,9 @@ This project was built in a fast-paced development cycle, showcasing:
 - 🎯 Product thinking focused on usability and flexibility
 - ✨ Clean UI & UX delivery
 
----
-
-## 📦 Setup Instructions
-
-```bash
-# Clone the repo
-git clone https://github.com/reatured/Personal-Schedule-Assistance.git
-cd Personal-Schedule-Assistance
-
-# Install dependencies
-npm install
-
-# Create a `.env` file based on `.env.example` and configure Supabase credentials
-
-# Run the dev server
-npm run dev
-```
 
 ---
 
 ## ✍️ Author
 
 **Lingyi Zhou** – [LinkedIn](https://www.linkedin.com/in/lingyizhou) · [Portfolio](https://lingyizhou.com)
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
----
-
-> Love the project? Star the repo ⭐ and share it with your productivity geek friends!
