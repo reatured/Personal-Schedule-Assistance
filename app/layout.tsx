@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/react'
+import { Providers } from './providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'Personal Schedule Builder',
+  description: 'A drag-and-drop schedule builder',
 }
 
 export default function RootLayout({
@@ -16,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-        <Analytics />
+        <Providers>
+          {children}
+          <Analytics />
+        </Providers>
       </body>
     </html>
   )

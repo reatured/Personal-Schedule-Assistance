@@ -23,6 +23,7 @@ import { ProjectCard } from "@/components/schedule-builder/project-card"
 import { ScheduledItemCard } from "@/components/schedule-builder/scheduled-item-card"
 import { Button } from "@/components/ui/button"
 import { Printer } from "lucide-react"
+import { GoogleCalendarSync } from "@/components/schedule-builder/google-calendar-sync"
 import { DebugSection } from "@/components/schedule-builder/debug-section"
 
 const APP_VERSION = "1.0.3" // Incremented version for data migration feature
@@ -331,6 +332,42 @@ export default function SchedulePage() {
     })
   }, [])
 
+  const handleGoogleSync = useCallback((newTasks: ScheduledTask[]) => {
+    setScheduleData((prev) => {
+      const newSchedule = { ...prev }
+      let addedCount = 0
+
+      newTasks.forEach((task: any) => {
+        const slotId = task.targetSlotId
+        if (!slotId) return
+        
+        // Ensure slot exists
+        if (!newSchedule[slotId]) {
+          newSchedule[slotId] = []
+        }
+
+        // Avoid duplicates
+        if (newSchedule[slotId].some(t => t.id === task.id)) return
+
+        // Check capacity
+        if (newSchedule[slotId].length < MAX_TASKS_PER_SLOT) {
+          // Remove temporary targetSlotId property before adding
+          const { targetSlotId, ...cleanTask } = task
+          newSchedule[slotId] = [...newSchedule[slotId], cleanTask]
+          addedCount++
+        }
+      })
+
+      if (addedCount > 0) {
+        alert(`Successfully added ${addedCount} event(s) from Google Calendar!`)
+      } else {
+        alert("No new events added. Slots might be full or events already synced.")
+      }
+
+      return newSchedule
+    })
+  }, [])
+
   // --- DND Logic ---
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event
@@ -448,9 +485,12 @@ export default function SchedulePage() {
       <div className="min-h-screen bg-gray-200 p-2 print:p-0 print:bg-white">
         <header className="mb-4 flex justify-between items-center print:hidden">
           <h1 className="text-xl font-bold text-gray-800">个人日程构建器</h1>
-          <Button onClick={handlePrint} variant="outline" size="sm">
-            <Printer className="mr-1.5 h-4 w-4" /> Print
-          </Button>
+          <div className="flex items-center gap-2">
+            <GoogleCalendarSync onSync={handleGoogleSync} />
+            <Button onClick={handlePrint} variant="outline" size="sm">
+              <Printer className="mr-1.5 h-4 w-4" /> Print
+            </Button>
+          </div>
         </header>
         {/* Wrapper for print layout control */}
         <div className="print:max-w-[20cm] print:mx-auto">
